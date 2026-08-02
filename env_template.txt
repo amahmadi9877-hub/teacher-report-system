@@ -1,0 +1,7 @@
+-- Create a .env file in the project directory (next to manage.py)
+-- Fill the below parameters
+NAME=
+USER=
+PASSWORD=
+HOST=
+PORT=
