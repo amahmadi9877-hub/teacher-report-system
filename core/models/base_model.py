@@ -1,7 +1,6 @@
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils import timezone
 
 from core.enums import State, Status
 
@@ -9,15 +8,18 @@ AUTH_USER = settings.AUTH_USER_MODEL
 
 
 class BaseModel(models.Model):
+    @classmethod
+    def make_allowed_statuses(cls):
+        return {
+            State.ACTIVE: cls.ACTIVE_STATUSES,
+            State.INACTIVE: cls.INACTIVE_STATUSES,
+            State.DELETED: cls.DELETED_ACTIVE_STATUSES,
+        }
+
     STATUS_CHOICES = Status
     ACTIVE_STATUSES = {Status.ACTIVE}
     INACTIVE_STATUSES = {Status.INACTIVE}
     DELETED_ACTIVE_STATUSES = {Status.DELETED}
-    ALLOWED_STATUSES = {
-        State.ACTIVE: ACTIVE_STATUSES,
-        State.INACTIVE: INACTIVE_STATUSES,
-        State.DELETED: DELETED_ACTIVE_STATUSES,
-    }
 
     state = models.IntegerField(
         choices=list(State.choices),
@@ -65,9 +67,9 @@ class BaseModel(models.Model):
         if self.status not in self.STATUS_CHOICES.values:
             raise ValidationError(f"{self.status} is not a valid status!")
 
-        allowed = self.ALLOWED_STATUSES.get(self.state, set())
-
-        if self.status not in allowed:
+        if self.status not in self.make_allowed_statuses().get(self.state, set()):
             raise ValidationError(
-                f"{self.status} is not allowed when state is {self.state}!"
+                {
+                    "__all__": f"The selected status '{self.status}' is not valid for the current state '{self.state}'!"
+                }
             )
