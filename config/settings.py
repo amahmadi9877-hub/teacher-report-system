@@ -29,11 +29,17 @@ SECRET_KEY = "django-insecure-7#ktmb%e91v+x9f!qjn5#wyg=g!vwar*xw%k&3at8212%^rrk1
 DEBUG = True
 
 ALLOWED_HOSTS = []
+AUTH_USER_MODEL = "accounts.User"
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    "accounts.apps.AccountsConfig",
+    "organizations.apps.OrganizationsConfig",
+    "courses.apps.CoursesConfig",
+    "reports.apps.ReportsConfig",
+    "payrolls.apps.PayrollsConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
