@@ -35,6 +35,8 @@ class BaseModel(models.Model):
         AUTH_USER,
         on_delete=models.RESTRICT,
         related_name="ownered_%(class)ss",
+        null=True,
+        blank=True,
     )
     responsible_user = models.ForeignKey(
         AUTH_USER,
