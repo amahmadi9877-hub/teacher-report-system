@@ -7,7 +7,7 @@ router = DefaultRouter(use_regex_path=False)
 router.register(
     prefix="academic-term",
     viewset=AcademicTermAPIModelViewSet,
-    basename="academic_term",
+    basename="academic-term",
 )
 router.register(prefix="course", viewset=CourseAPIModelViewSet, basename="course")
 
