@@ -84,6 +84,7 @@ class CustomUserAdmin(UserAdmin):
                     "last_name",
                     "role",
                     "phone_number",
+                    "backup_phone_number",
                     "password1",
                     "password2",
                 ),
