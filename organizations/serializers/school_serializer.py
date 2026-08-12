@@ -5,4 +5,9 @@ from organizations.models import School
 class SchoolSerializer(BaseModelSerializer):
     class Meta:
         model = School
-        fields = "__all__"
+        fields = [
+            "name",
+            "manager",
+            "business_phone",
+            "address",
+        ]
