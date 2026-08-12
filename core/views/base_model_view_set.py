@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from core.permissions import IsResponsible, IsAdmin
-from core.serializers import AssignSerializer
+from core.serializers import AssignSerializer, SetOwnerSerializer
 
 AUTH_USER = get_user_model()
 
@@ -26,7 +26,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     )
     def assign(self, request, pk):
         obj = self.get_object()
-        assert hasattr(obj, "responsible_user"), "The object has no 'responsible_user'"
+        assert hasattr(obj, "responsible_user"), "The object has no 'responsible_user'!"
         serializer = AssignSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         obj.responsible_user = serializer.validated_data["user_id"]
@@ -39,8 +39,20 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def deactivate(self, request):
         pass
 
-    def set_owner(self, request):
-        pass
+    @action(
+        detail=True,
+        methods=["POST"],
+        url_path="set-owner",
+        permission_classes=SET_OWNER_PERMISSIONS,
+    )
+    def set_owner(self, request, pk):
+        obj = self.get_object()
+        assert hasattr(obj, "owner_user"), "The object has no 'owner_user'!"
+        serializer = SetOwnerSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        obj.owner_user = serializer.validated_data["user_id"]
+        obj.save()
+        return Response({"detail": "Owner sat successfully."})
 
     def perform_create(self, serializer):
         serializer.save(
