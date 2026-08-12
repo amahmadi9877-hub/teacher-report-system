@@ -7,6 +7,7 @@ from courses.enums import AcademicTermStatus
 # Create your models here.
 class AcademicTerm(BaseModel):
     STATUS_CHOICES = AcademicTermStatus
+    DEFAULT_ACTIVE_STATUS = AcademicTermStatus.DRAFT
     ACTIVE_STATUSES = {AcademicTermStatus.DRAFT, AcademicTermStatus.IN_PROGRESS}
     INACTIVE_STATUSES = {AcademicTermStatus.COMPLETED, AcademicTermStatus.CANCELED}
     DELETED_ACTIVE_STATUSES = {AcademicTermStatus.DELETED}

@@ -7,6 +7,7 @@ from courses.enums import CourseSessionStatus
 # Create your models here.
 class CourseSession(BaseModel):
     STATUS_CHOICES = CourseSessionStatus
+    DEFAULT_ACTIVE_STATUS = CourseSessionStatus.DRAFT
     ACTIVE_STATUSES = {CourseSessionStatus.DRAFT, CourseSessionStatus.IN_PROGRESS}
     INACTIVE_STATUSES = {CourseSessionStatus.COMPLETED, CourseSessionStatus.CANCELED}
     DELETED_ACTIVE_STATUSES = {CourseSessionStatus.DELETED}

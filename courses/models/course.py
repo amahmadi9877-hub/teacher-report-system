@@ -7,6 +7,7 @@ from courses.enums import CourseStatus
 # Create your models here.
 class Course(BaseModel):
     STATUS_CHOICES = CourseStatus
+    DEFAULT_ACTIVE_STATUS = CourseStatus.DRAFT
     ACTIVE_STATUSES = {
         CourseStatus.DRAFT,
         CourseStatus.IN_PROGRESS,
