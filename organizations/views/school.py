@@ -1,12 +1,11 @@
-from rest_framework.permissions import IsAuthenticated
-from core.permissions import IsEducationOfficerOrAdmin
+from core.permissions import IsEducationOfficer, IsAdmin
 from core.views import BaseModelViewSet
 from organizations.models import School
 from organizations.serializers import SchoolSerializer
 
 
 class SchoolAPIModelViewSet(BaseModelViewSet):
-    permission_classes = [IsEducationOfficerOrAdmin, IsAuthenticated]
+    # permission_classes = [(IsEducationOfficer | IsAdmin)]
     model = School
     queryset = School.objects.all()
     serializer_class = SchoolSerializer

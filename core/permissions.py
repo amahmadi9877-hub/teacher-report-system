@@ -2,43 +2,42 @@ from rest_framework import permissions
 from accounts.enums import UserRole
 
 
-class IsTeacherOrAdmin(permissions.BasePermission):
+class IsTeacher(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role in (
-            UserRole.TEACHER,
-            UserRole.ADMIN,
-        )
+        return request.user.is_authenticated and request.user.role == UserRole.TEACHER
 
 
-class IsEducationOfficerOrAdmin(permissions.BasePermission):
+class IsEducationOfficer(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role in (
-            UserRole.EDUCATION_OFFICER,
-            UserRole.ADMIN,
+        return (
+            request.user.is_authenticated
+            and request.user.role == UserRole.EDUCATION_OFFICER
         )
 
 
 class IsFinanceOfficerOrAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role == (
-            UserRole.FINANCE_OFFICER,
-            UserRole.ADMIN,
-        )
-
-
-class IsOwnerOrAdmin(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
         return (
             request.user.is_authenticated
-            and request.user == obj.owner_user
-            or request.user.role == UserRole.ADMIN
+            and request.user.role == UserRole.FINANCE_OFFICER
         )
 
 
-class IsResponsibleOrAdmin(permissions.BasePermission):
+class IsOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return (
-            request.user.is_authenticated
-            and request.user == obj.owner_user
-            or request.user.role == UserRole.ADMIN
-        )
+        return request.user.is_authenticated and request.user == obj.owner_user
+
+
+class IsResponsible(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return request.user.is_authenticated and request.user == obj.owner_user
+
+
+class IsAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == UserRole.ADMIN
+
+
+class IsCreator(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return request.user.is_authenticated and request.user == obj.created_by
