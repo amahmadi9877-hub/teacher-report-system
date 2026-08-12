@@ -12,18 +12,24 @@ AUTH_USER = get_user_model()
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):
+    ASSIGN_PERMISSIONS = [IsAuthenticated]
+    ACTIVATE_PERMISSIONS = [IsAuthenticated]
+    DEACTIVATE_PERMISSION = [IsAuthenticated]
+    SET_OWNER_PERMISSIONS = [IsAuthenticated]
+
     # permission_classes = [IsAuthenticated]
     @action(
         detail=True,
         methods=["POST"],
         url_path="assign",
-        # permission_classes=[(IsResponsible | IsAdmin)],
+        permission_classes=ASSIGN_PERMISSIONS,
     )
     def assign(self, request, pk):
         obj = self.get_object()
+        assert hasattr(obj, "responsible_user"), "The object has no 'responsible_user'"
         serializer = AssignSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        obj.owner_user = serializer.validated_data["user_id"]
+        obj.responsible_user = serializer.validated_data["user_id"]
         obj.save()
         return Response({"detail": "Record assigned successfully."})
 
