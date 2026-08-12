@@ -18,6 +18,9 @@ class BaseModelSerializer(serializers.ModelSerializer):
 
         state = attrs.get("state", getattr(self.instance, "state", None))
 
+        if state == None and status == None:
+            return attrs
+
         if status not in model.STATUS_CHOICES.values:
             raise serializers.ValidationError({"status": f"{status} is not valid."})
 

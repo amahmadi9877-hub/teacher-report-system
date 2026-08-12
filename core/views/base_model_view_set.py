@@ -94,11 +94,14 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return Response({"detail": "Owner sat successfully."})
 
     def perform_create(self, serializer):
+        model = serializer.Meta.model
         serializer.save(
             created_by=self.request.user,
             created_at=timezone.now(),
             updated_by=self.request.user,
             updated_at=timezone.now(),
+            state=1,
+            status=model.DEFAULT_ACTIVE_STATUS,
         )
 
     def perform_update(self, serializer):
