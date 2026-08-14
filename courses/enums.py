@@ -25,3 +25,9 @@ class CourseSessionStatus(models.IntegerChoices):
     COMPLETED = 2, "Completed"
     CANCELED = 3, "Canceled"
     DELETED = -1, "Deleted"
+
+
+class SessionDuration(models.IntegerChoices):
+    MINUTES_60 = 60, "60 minutes"
+    MINUTES_90 = 90, "90 minutes"
+    MINUTES_120 = 120, "120 minutes"
