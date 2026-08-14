@@ -7,6 +7,10 @@ class BaseModelSerializer(serializers.ModelSerializer):
     updated_by = UserModelSerializer(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
+    state = serializers.IntegerField(read_only=True)
+    status = serializers.IntegerField(read_only=True)
+    owner_user = UserModelSerializer(read_only=True)
+    responsible_user = UserModelSerializer(read_only=True)
 
     def validate(self, attrs):
 
@@ -15,6 +19,9 @@ class BaseModelSerializer(serializers.ModelSerializer):
         status = attrs.get("status", getattr(self.instance, "status", None))
 
         state = attrs.get("state", getattr(self.instance, "state", None))
+
+        if state == None and status == None:
+            return attrs
 
         if status not in model.STATUS_CHOICES.values:
             raise serializers.ValidationError({"status": f"{status} is not valid."})

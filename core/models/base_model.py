@@ -17,6 +17,7 @@ class BaseModel(models.Model):
         }
 
     STATUS_CHOICES = Status
+    DEFAULT_ACTIVE_STATUS = Status.ACTIVE
     ACTIVE_STATUSES = {Status.ACTIVE}
     INACTIVE_STATUSES = {Status.INACTIVE}
     DELETED_ACTIVE_STATUSES = {Status.DELETED}

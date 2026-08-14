@@ -14,9 +14,11 @@ class CourseSchedule(BaseModel):
     end_time = models.TimeField()
     session_count = models.IntegerField(default=0)
     course = models.ForeignKey("courses.Course", on_delete=models.CASCADE)
-    course_instructore = models.ForeignKey(
+    course_instructor = models.ForeignKey(
         "courses.CourseInstructor", on_delete=models.SET_NULL, null=True, blank=True
     )
+    responsible_user = None
+    owner_user = None
 
     def __str__(self):
         return self.name

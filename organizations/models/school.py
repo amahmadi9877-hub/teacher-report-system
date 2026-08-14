@@ -9,6 +9,8 @@ class School(BaseModel):
     manager = models.CharField(max_length=150, blank=True, null=True)
     business_phone = models.CharField(max_length=14, unique=True)
     address = models.TextField(blank=True, null=True)
+    owner_user = None
+    responsible_user = None
 
     def __str__(self):
         return self.name
