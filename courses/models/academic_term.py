@@ -14,10 +14,13 @@ class AcademicTerm(BaseModel):
     name = models.CharField(max_length=100)
     start_date = models.DateField()
     end_date = models.DateField()
+    is_summer = models.BooleanField(default=False)
     status = models.IntegerField(
         choices=list(AcademicTermStatus.choices),
         default=AcademicTermStatus.DRAFT,
     )
+    responsible_user = None
+    owner_user = None
 
     def __str__(self):
         return self.name
