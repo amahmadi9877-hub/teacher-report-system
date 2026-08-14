@@ -1,5 +1,6 @@
 from django.db import models
 
+from core.enums.week_day import WeekDay
 from core.models import BaseModel
 from courses.enums import CourseSessionStatus
 
@@ -13,10 +14,11 @@ class CourseSession(BaseModel):
     DELETED_ACTIVE_STATUSES = {CourseSessionStatus.DELETED}
     name = models.CharField(max_length=100)
     date = models.DateField()
+    week_day = models.IntegerField(choices=WeekDay.choices)
     start_time = models.TimeField()
     end_time = models.TimeField()
     course = models.ForeignKey("courses.Course", on_delete=models.RESTRICT)
-    course_schedul = models.ForeignKey(
+    course_schedule = models.ForeignKey(
         "courses.CourseSchedule", on_delete=models.SET_NULL, blank=True, null=True
     )
     status = models.IntegerField(
