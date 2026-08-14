@@ -5,7 +5,6 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from core.permissions import IsResponsible, IsAdmin
 from core.serializers import (
     AssignSerializer,
     SetOwnerSerializer,
@@ -17,17 +16,21 @@ AUTH_USER = get_user_model()
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):
-    ASSIGN_PERMISSIONS = [IsAuthenticated]
-    ACTIVATE_PERMISSIONS = [IsAuthenticated]
-    DEACTIVATE_PERMISSIONS = [IsAuthenticated]
-    SET_OWNER_PERMISSIONS = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
+    PERMISSIONS_BY_ACTION = {}
 
-    # permission_classes = [IsAuthenticated]
+    def get_permissions(self):
+        permission_classes = self.PERMISSIONS_BY_ACTION.get(
+            self.action,
+            self.permission_classes,
+        )
+
+        return [permission() for permission in permission_classes]
+
     @action(
         detail=True,
         methods=["POST"],
         url_path="assign",
-        permission_classes=ASSIGN_PERMISSIONS,
     )
     def assign(self, request, pk):
         obj = self.get_object()
@@ -44,7 +47,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         detail=True,
         methods=["POST"],
         url_path="activate",
-        permission_classes=ACTIVATE_PERMISSIONS,
     )
     def activate(self, request, pk):
         obj = self.get_object()
@@ -63,7 +65,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         detail=True,
         methods=["POST"],
         url_path="deactivate",
-        permission_classes=DEACTIVATE_PERMISSIONS,
     )
     def deactivate(self, request, pk):
         obj = self.get_object()
@@ -82,7 +83,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         detail=True,
         methods=["POST"],
         url_path="set-owner",
-        permission_classes=SET_OWNER_PERMISSIONS,
     )
     def set_owner(self, request, pk):
         obj = self.get_object()
