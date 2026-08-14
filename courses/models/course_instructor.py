@@ -9,6 +9,7 @@ class CourseInstructor(BaseModel):
     start_date = models.DateField()
     end_date = models.DateField()
     course = models.ForeignKey("courses.Course", on_delete=models.CASCADE)
+    responsible_user = None
 
     def __str__(self):
         return self.name
