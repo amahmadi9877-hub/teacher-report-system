@@ -9,6 +9,8 @@ class BaseModelSerializer(serializers.ModelSerializer):
     updated_at = serializers.DateTimeField(read_only=True)
     state = serializers.IntegerField(read_only=True)
     status = serializers.IntegerField(read_only=True)
+    owner_user = UserModelSerializer(read_only=True)
+    responsible_user = UserModelSerializer(read_only=True)
 
     def validate(self, attrs):
 
