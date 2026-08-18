@@ -40,10 +40,6 @@ class CourseScheduleService:
     def create_from_course(course, user):
         start_time = time(8, 0)
         end_time = time(8, 0)
-        if not course.owner_user:
-            raise ValidationError(
-                {"owner_user": "Owner user of course instructor is required!"}
-            )
         return CourseSchedule.objects.create(
             name=f"schedule from {course.name}",
             start_date=course.start_date,
