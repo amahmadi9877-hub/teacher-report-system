@@ -4,6 +4,9 @@ from core.serializers.assign_serializer import AssignSerializer
 from core.serializers.set_owner_serializer import SetOwnerSerializer
 from core.serializers.activate_serializer import ActivateSerializer
 from core.serializers.deactivate_serializer import DeactivateSerializer
+from core.serializers.set_owner_just_teacher_serializer import (
+    SetOwnerJustTeacherSerializer,
+)
 
 __all__ = [
     "BaseModelSerializer",
@@ -12,4 +15,5 @@ __all__ = [
     "SetOwnerSerializer",
     "ActivateSerializer",
     "DeactivateSerializer",
+    "SetOwnerJustTeacherSerializer",
 ]
