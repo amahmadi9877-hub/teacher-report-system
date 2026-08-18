@@ -29,6 +29,7 @@ class SessionReport(BaseModel):
         choices=list(ReportStatus.choices),
         default=ReportStatus.DRAFT,
     )
+    is_delayed = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
