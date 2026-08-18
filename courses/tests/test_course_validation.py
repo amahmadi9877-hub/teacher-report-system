@@ -407,89 +407,87 @@ class CourseAPITest(APITestCase):
             status.HTTP_200_OK,
         )
 
+    def test_cannot_change_academic_term_with_instructors(self):
+        another_term = AcademicTerm.objects.create(
+            name="Term 2",
+            start_date=date(2026, 1, 1),
+            end_date=date(2026, 6, 30),
+        )
 
-def test_cannot_change_academic_term_with_instructors(self):
-    another_term = AcademicTerm.objects.create(
-        name="Term 2",
-        start_date=date(2026, 1, 1),
-        end_date=date(2026, 6, 30),
-    )
+        CourseInstructor.objects.create(
+            course=self.course,
+            start_date=date(2026, 2, 15),
+            end_date=date(2026, 5, 15),
+        )
 
-    CourseInstructor.objects.create(
-        course=self.course,
-        start_date=date(2026, 2, 15),
-        end_date=date(2026, 5, 15),
-    )
+        url = reverse(
+            "course-detail",
+            kwargs={"pk": self.course.pk},
+        )
 
-    url = reverse(
-        "course-detail",
-        kwargs={"pk": self.course.pk},
-    )
+        data = {
+            "name": "Updated Course",
+            "academic_term": another_term.pk,
+            "school": self.school.pk,
+            "session_duration": 90,
+            "start_date": "2026-01-01",
+            "end_date": "2026-06-30",
+        }
 
-    data = {
-        "name": "Updated Course",
-        "academic_term": another_term.pk,
-        "school": self.school.pk,
-        "session_duration": 90,
-        "start_date": "2026-01-01",
-        "end_date": "2026-06-30",
-    }
+        response = self.client.put(url, data)
 
-    response = self.client.put(url, data)
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
 
-    self.assertEqual(
-        response.status_code,
-        status.HTTP_400_BAD_REQUEST,
-    )
+        self.assertIn(
+            "Course has course_instructors so can't change the academic_term!",
+            str(response.data),
+        )
 
-    self.assertIn(
-        "Course has course_instructors so can't change the academic_term!",
-        str(response.data),
-    )
+    def test_cannot_change_academic_term_with_schedules(self):
+        another_term = AcademicTerm.objects.create(
+            name="Term 2",
+            start_date=date(2026, 1, 1),
+            end_date=date(2026, 6, 30),
+        )
 
+        CourseSchedule.objects.create(
+            name="Schedule 1",
+            course=self.course,
+            start_date=date(2026, 2, 15),
+            end_date=date(2026, 5, 15),
+            week_day=0,
+            start_time="09:00:00",
+            end_time="10:30:00",
+        )
 
-def test_cannot_change_academic_term_with_schedules(self):
-    another_term = AcademicTerm.objects.create(
-        name="Term 2",
-        start_date=date(2026, 1, 1),
-        end_date=date(2026, 6, 30),
-    )
+        url = reverse(
+            "course-detail",
+            kwargs={"pk": self.course.pk},
+        )
 
-    CourseSchedule.objects.create(
-        name="Schedule 1",
-        course=self.course,
-        start_date=date(2026, 2, 15),
-        end_date=date(2026, 5, 15),
-        week_day=0,
-        start_time="09:00:00",
-        end_time="10:30:00",
-    )
+        data = {
+            "name": "Updated Course",
+            "academic_term": another_term.pk,
+            "school": self.school.pk,
+            "session_duration": 90,
+            "start_date": "2026-01-01",
+            "end_date": "2026-06-30",
+        }
 
-    url = reverse(
-        "course-detail",
-        kwargs={"pk": self.course.pk},
-    )
+        response = self.client.put(url, data)
 
-    data = {
-        "name": "Updated Course",
-        "academic_term": another_term.pk,
-        "school": self.school.pk,
-        "session_duration": 90,
-        "start_date": "2026-01-01",
-        "end_date": "2026-06-30",
-    }
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
 
-    response = self.client.put(url, data)
-
-    self.assertEqual(
-        response.status_code,
-        status.HTTP_400_BAD_REQUEST,
-    )
-
-    self.assertIn(
-        "Course has course_schedules so can't change the academic_term!",
-        str(response.data),
-    )
+        self.assertIn(
+            "Course has course_schedules so can't change the academic_term!",
+            str(response.data),
+        )
 
     def test_cannot_change_academic_term_with_sessions(self):
         another_term = AcademicTerm.objects.create(

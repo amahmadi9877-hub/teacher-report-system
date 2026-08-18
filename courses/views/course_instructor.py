@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from core.permissions import IsEducationOfficer, IsAdmin
+from core.serializers import SetOwnerJustTeacherSerializer
 from core.views import BaseModelViewSet
 from courses.models import CourseInstructor
 from courses.serializers import (
@@ -18,6 +19,7 @@ class CourseInstructorAPIModelViewSet(BaseModelViewSet):
     queryset = CourseInstructor.objects.all()
     serializer_class = CourseInstructorModelSerializer
     lookup_url_kwarg = "pk"
+    set_owner_serializer_class = SetOwnerJustTeacherSerializer
 
     @action(detail=True, methods=["POST"], url_path="create-schedule")
     def create_course_schedule(self, request, pk):

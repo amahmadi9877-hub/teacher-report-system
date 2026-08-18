@@ -4,6 +4,7 @@ from rest_framework.response import Response
 
 from core.permissions import IsEducationOfficer, IsAdmin, IsTeacher, IsOwner
 from core.views import BaseModelViewSet
+from core.serializers import SetOwnerJustTeacherSerializer
 from courses.models import CourseSession
 from courses.serializers import CourseSessionModelSerializer
 
@@ -19,6 +20,7 @@ class CourseSessionAPIModelViewSet(BaseModelViewSet):
     queryset = CourseSession.objects.all()
     serializer_class = CourseSessionModelSerializer
     lookup_url_kwarg = "pk"
+    set_owner_serializer_class = SetOwnerJustTeacherSerializer
 
     @action(
         detail=False,

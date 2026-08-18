@@ -30,7 +30,7 @@ class CourseSessionService:
                     start_time=course_schedule.start_time,
                     end_time=course_schedule.end_time,
                     course=course_schedule.course,
-                    course_schedul=course_schedule,
+                    course_schedule=course_schedule,
                     owner_user=owner_user,
                     responsible_user=owner_user,
                     created_by=user,

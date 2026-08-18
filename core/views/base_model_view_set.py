@@ -16,6 +16,8 @@ AUTH_USER = get_user_model()
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):
+    set_owner_serializer_class = SetOwnerSerializer
+    assign_serializer_class = AssignSerializer
     permission_classes = [IsAuthenticated]
     PERMISSIONS_BY_ACTION = {}
 
@@ -37,7 +39,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         assert hasattr(obj, "responsible_user"), (
             "The object has no 'responsible_user' field!"
         )
-        serializer = AssignSerializer(data=request.data)
+        serializer = self.assign_serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         obj.responsible_user = serializer.validated_data["user_id"]
         obj.save()
@@ -87,7 +89,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def set_owner(self, request, pk):
         obj = self.get_object()
         assert hasattr(obj, "owner_user"), "The object has no 'owner_user' field!"
-        serializer = SetOwnerSerializer(data=request.data)
+        serializer = self.set_owner_serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         obj.owner_user = serializer.validated_data["user_id"]
         obj.save()
