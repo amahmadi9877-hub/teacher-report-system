@@ -15,7 +15,7 @@ class Course(BaseModel):
         CourseStatus.SCHEDULED,
     }
     INACTIVE_STATUSES = {CourseStatus.COMPLETED, CourseStatus.CANCELED}
-    DELETED_ACTIVE_STATUSES = {CourseStatus.DELETED}
+    DELETED_STATUSES = {CourseStatus.DELETED}
     name = models.CharField(max_length=100)
     academic_term = models.ForeignKey("courses.AcademicTerm", on_delete=models.RESTRICT)
     school = models.ForeignKey("organizations.School", on_delete=models.RESTRICT)
