@@ -10,7 +10,7 @@ class AcademicTerm(BaseModel):
     DEFAULT_ACTIVE_STATUS = AcademicTermStatus.DRAFT
     ACTIVE_STATUSES = {AcademicTermStatus.DRAFT, AcademicTermStatus.IN_PROGRESS}
     INACTIVE_STATUSES = {AcademicTermStatus.COMPLETED, AcademicTermStatus.CANCELED}
-    DELETED_ACTIVE_STATUSES = {AcademicTermStatus.DELETED}
+    DELETED_STATUSES = {AcademicTermStatus.DELETED}
     name = models.CharField(max_length=100)
     start_date = models.DateField()
     end_date = models.DateField()

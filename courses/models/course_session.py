@@ -11,7 +11,7 @@ class CourseSession(BaseModel):
     DEFAULT_ACTIVE_STATUS = CourseSessionStatus.DRAFT
     ACTIVE_STATUSES = {CourseSessionStatus.DRAFT, CourseSessionStatus.IN_PROGRESS}
     INACTIVE_STATUSES = {CourseSessionStatus.COMPLETED, CourseSessionStatus.CANCELED}
-    DELETED_ACTIVE_STATUSES = {CourseSessionStatus.DELETED}
+    DELETED_STATUSES = {CourseSessionStatus.DELETED}
     name = models.CharField(max_length=100)
     date = models.DateField()
     week_day = models.IntegerField(choices=WeekDay.choices)

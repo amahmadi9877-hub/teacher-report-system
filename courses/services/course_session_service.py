@@ -10,7 +10,7 @@ class CourseSessionService:
     @staticmethod
     @transaction.atomic
     def create_from_schedule(course_schedule, user):
-        owner_user = user
+        owner_user = None
         if course_schedule.course_instructor:
             owner_user = course_schedule.course_instructor.owner_user
 
