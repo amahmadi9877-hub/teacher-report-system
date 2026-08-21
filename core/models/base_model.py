@@ -13,14 +13,14 @@ class BaseModel(models.Model):
         return {
             State.ACTIVE: cls.ACTIVE_STATUSES,
             State.INACTIVE: cls.INACTIVE_STATUSES,
-            State.DELETED: cls.DELETED_ACTIVE_STATUSES,
+            State.DELETED: cls.DELETED_STATUSES,
         }
 
     STATUS_CHOICES = Status
     DEFAULT_ACTIVE_STATUS = Status.ACTIVE
     ACTIVE_STATUSES = {Status.ACTIVE}
     INACTIVE_STATUSES = {Status.INACTIVE}
-    DELETED_ACTIVE_STATUSES = {Status.DELETED}
+    DELETED_STATUSES = {Status.DELETED}
 
     state = models.IntegerField(
         choices=list(State.choices),
