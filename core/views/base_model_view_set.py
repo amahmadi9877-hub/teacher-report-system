@@ -1,6 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from rest_framework import viewsets
+
+from django_filters.rest_framework import DjangoFilterBackend
+
+from rest_framework import viewsets, exceptions
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -11,6 +14,7 @@ from core.serializers import (
     ActivateSerializer,
     DeactivateSerializer,
 )
+from core.enums import State
 
 AUTH_USER = get_user_model()
 
@@ -20,6 +24,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     activate_serializer_class = ActivateSerializer
     deactivate_serializer_class = DeactivateSerializer
     set_owner_serializer_class = SetOwnerSerializer
+
     permission_classes = [IsAuthenticated]
     PERMISSIONS_BY_ACTION = {}
 
@@ -31,19 +36,27 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
         return [permission() for permission in permission_classes]
 
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = None
+    FILTERSETS_BY_ACTION = {}
+
+    def get_filterset_class(self):
+        return self.FILTERSETS_BY_ACTION.get(self.action, self.filterset_class)
+
     @action(detail=True, methods=["POST"], url_path="assign")
     def assign(self, request, pk):
         obj = self.get_object()
         assert hasattr(obj, "responsible_user"), (
             "The object has no 'responsible_user' field!"
         )
-        serializer = self.assign_serializer_class(data=request.data)
+        serializer = self.assign_serializer_class(instance=obj, data=request.data)
         serializer.is_valid(raise_exception=True)
-        obj.responsible_user = serializer.validated_data["user_id"]
-        self.perform_assign(obj)
+        self.perform_assign(serializer)
         return Response({"detail": "Record assigned successfully."})
 
-    def perform_assign(self, obj):
+    def perform_assign(self, serializer):
+        obj = serializer.instance
+        obj.responsible_user = serializer.validated_data["user_id"]
         obj.save()
 
     @action(detail=True, methods=["POST"], url_path="activate")
@@ -53,13 +66,15 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         assert hasattr(obj, "status"), "The object has no 'status' field!"
         serializer = self.activate_serializer_class(instance=obj, data=request.data)
         serializer.is_valid(raise_exception=True)
-        obj.state = 1
-        obj.status = serializer.validated_data["status"]
+        self.perform_activate(serializer)
         return Response(
             {"detail": f"Record activated successfully with {obj.status} status."}
         )
 
-    def perfrom_activate(self, obj):
+    def perform_activate(self, serializer):
+        obj = serializer.instance
+        obj.state = State.ACTIVE
+        obj.status = serializer.validated_data["status"]
         obj.save()
 
     @action(detail=True, methods=["POST"], url_path="deactivate")
@@ -69,25 +84,29 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         assert hasattr(obj, "status"), "The object has no 'status' field!"
         serializer = self.deactivate_serializer_class(instance=obj, data=request.data)
         serializer.is_valid(raise_exception=True)
-        obj.state = 0
-        obj.status = serializer.validated_data["status"]
+        self.perform_deactivate(serializer)
         return Response(
             {"detail": f"Record deactivated successfully with {obj.status} status."}
         )
 
-    def perform_deactivate(self, obj):
+    def perform_deactivate(self, serializer):
+        obj = serializer.instance
+        obj.state = State.INACTIVE
+        obj.status = serializer.validated_data["status"]
         obj.save()
 
     @action(detail=True, methods=["POST"], url_path="set-owner")
     def set_owner(self, request, pk):
         obj = self.get_object()
         assert hasattr(obj, "owner_user"), "The object has no 'owner_user' field!"
-        serializer = self.set_owner_serializer_class(data=request.data)
+        serializer = self.set_owner_serializer_class(instance=obj, data=request.data)
         serializer.is_valid(raise_exception=True)
-        obj.owner_user = serializer.validated_data["user_id"]
+        self.perform_set_owner(serializer)
         return Response({"detail": "Owner sat successfully."})
 
-    def perform_set_owner(sefl, obj):
+    def perform_set_owner(self, serializer):
+        obj = serializer.instance
+        obj.owner_user = serializer.validated_data["user_id"]
         obj.save()
 
     def perform_create(self, serializer):
@@ -97,11 +116,15 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             created_at=timezone.now(),
             updated_by=self.request.user,
             updated_at=timezone.now(),
-            state=1,
+            state=State.ACTIVE,
             status=model.DEFAULT_ACTIVE_STATUS,
         )
 
     def perform_update(self, serializer):
+        if serializer.instance.state == 0:
+            raise exceptions.PermissionDenied(
+                {"__all__": "Object is deactive and read_only!"}
+            )
         serializer.save(
             updated_by=self.request.user,
             updated_at=timezone.now(),
