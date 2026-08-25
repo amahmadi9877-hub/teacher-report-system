@@ -36,7 +36,7 @@ class SessionReportAPIModelViewSet(BaseModelViewSet):
         "retrieve": [(IsEducationOfficer | (IsTeacher & IsOwner) | IsAdmin)],
         "update": [((IsTeacher & IsOwner & IsResponsible) | IsAdmin)],
         "partial_update": [((IsTeacher & IsOwner & IsResponsible) | IsAdmin)],
-        "assign": [(IsEducationOfficer | IsAdmin)],
+        "assign": [(IsEducationOfficer | (IsTeacher & IsOwner) | IsAdmin)],
         "set_owner": [(IsEducationOfficer | IsAdmin)],
         "deactivate": [((IsEducationOfficer & IsResponsible) | IsAdmin)],
         "activate": [
@@ -96,7 +96,6 @@ class SessionReportAPIModelViewSet(BaseModelViewSet):
 
     @audit
     def perform_activate(self, serializer):
-        print("99999999", serializer.validated_data["status"])
         if serializer.validated_data["status"] == ReportStatus.WAITING_FOR_REVIEW:
             obj = serializer.instance
             obj.last_submit_date_time = timezone.now()
@@ -113,6 +112,13 @@ class SessionReportAPIModelViewSet(BaseModelViewSet):
 
     @audit
     def perform_deactivate(self, serializer):
+        obj = serializer.instance
+        obj.reviewer_description = serializer.validated_data["reviewer_description"]
+        obj.save(
+            update_fields=[
+                "reviewer_description",
+            ]
+        )
         return super().perform_deactivate(serializer)
 
     @audit
@@ -186,7 +192,7 @@ class SessionReportAPIModelViewSet(BaseModelViewSet):
         for report in reports:
             if (
                 report.status == ReportStatus.DRAFT
-                or report.responsible_user != request.owner
+                or report.responsible_user != request.user
             ):
                 error_ids.append(report.id)
                 continue
