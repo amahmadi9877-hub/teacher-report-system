@@ -30,7 +30,7 @@ class IsOwner(permissions.BasePermission):
 
 class IsResponsible(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return request.user.is_authenticated and request.user == obj.owner_user
+        return request.user.is_authenticated and request.user == obj.responsible_user
 
 
 class IsAdmin(permissions.BasePermission):
