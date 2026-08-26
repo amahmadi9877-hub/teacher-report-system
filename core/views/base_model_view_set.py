@@ -2,19 +2,20 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from django_filters.rest_framework import DjangoFilterBackend
-
-from rest_framework import viewsets, exceptions
+from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from core.decorators import prevent_inactive
+from core.enums import State
 from core.serializers import (
     AssignSerializer,
     SetOwnerSerializer,
     ActivateSerializer,
     DeactivateSerializer,
 )
-from core.enums import State
 
 AUTH_USER = get_user_model()
 
@@ -24,7 +25,10 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     activate_serializer_class = ActivateSerializer
     deactivate_serializer_class = DeactivateSerializer
     set_owner_serializer_class = SetOwnerSerializer
-
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_class = None
+    search_fields = []
+    ordering = ["-created_on"]
     permission_classes = [IsAuthenticated]
     PERMISSIONS_BY_ACTION = {}
 
@@ -35,13 +39,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         )
 
         return [permission() for permission in permission_classes]
-
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = None
-    FILTERSETS_BY_ACTION = {}
-
-    def get_filterset_class(self):
-        return self.FILTERSETS_BY_ACTION.get(self.action, self.filterset_class)
 
     @action(detail=True, methods=["POST"], url_path="assign")
     def assign(self, request, pk):
@@ -96,6 +93,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         obj.save()
 
     @action(detail=True, methods=["POST"], url_path="set-owner")
+    @prevent_inactive
     def set_owner(self, request, pk):
         obj = self.get_object()
         assert hasattr(obj, "owner_user"), "The object has no 'owner_user' field!"
@@ -120,11 +118,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             status=model.DEFAULT_ACTIVE_STATUS,
         )
 
+    @prevent_inactive
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
     def perform_update(self, serializer):
-        if serializer.instance.state == 0:
-            raise exceptions.PermissionDenied(
-                {"__all__": "Object is deactive and read_only!"}
-            )
         serializer.save(
             updated_by=self.request.user,
             updated_at=timezone.now(),
