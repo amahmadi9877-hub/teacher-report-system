@@ -28,6 +28,7 @@ class SessionReport(BaseModel):
         default=ReportStatus.DRAFT,
     )
     is_delayed = models.BooleanField(default=False)
+    delay_minutes = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
