@@ -3,6 +3,7 @@ from datetime import time, timedelta
 from django.db import transaction
 from django.utils import timezone
 
+from core.validators import TimeDifferenceValidator
 from courses.models import CourseSession
 
 
@@ -10,6 +11,15 @@ class CourseSessionService:
     @staticmethod
     @transaction.atomic
     def create_from_schedule(course_schedule, user):
+        TimeDifferenceValidator(
+            course_schedule.start_time,
+            course_schedule.end_time,
+            "course_schedule_start_time",
+            "course_schedule_end_time",
+            minimum_difference=course_schedule.course.session_duration,
+            exact=True,
+        )
+
         owner_user = None
         if course_schedule.course_instructor:
             owner_user = course_schedule.course_instructor.owner_user
