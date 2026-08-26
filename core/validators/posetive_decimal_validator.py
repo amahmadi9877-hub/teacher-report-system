@@ -1,8 +1,6 @@
 from rest_framework.serializers import ValidationError
 
 
-def posetive_int_validator(number: int, number_title: str):
-    if not type(number) is int:
-        raise ValueError(f"Invalid data type: {type(number)}")
+def posetive_decimal_validator(number, number_title: str):
     if number < 0:
         raise ValidationError({f"{number_title}": f"{number_title} is not posetive"})
