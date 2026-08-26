@@ -56,6 +56,6 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"user1: ({teacher_sample.username},123)\nuser2: ({education_officer_sample.username},123)\nuser1: ({finance_officer_sample.username},123)\n"
+                f"user1: ({teacher_sample.id},{teacher_sample.username},123)\nuser2: ({education_officer_sample.id},{education_officer_sample.username},123)\nuser1: ({finance_officer_sample.id},{finance_officer_sample.username},123)\n"
             )
         )
