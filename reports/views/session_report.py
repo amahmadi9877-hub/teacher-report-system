@@ -29,7 +29,6 @@ from reports.serializers import (
 
 class SessionReportAPIModelViewSet(BaseModelViewSet):
     permission_classes = [IsAdmin]
-
     PERMISSIONS_BY_ACTION = {  # noqa: RUF012
         "list": [(IsEducationOfficer | IsAdmin)],
         "create": [(IsTeacher | IsAdmin)],
@@ -45,18 +44,15 @@ class SessionReportAPIModelViewSet(BaseModelViewSet):
         "submitted_reports": [(IsEducationOfficer | IsAdmin)],
         "monthly_report": [(IsTeacher | IsAdmin)],
         "bulk_deactivate": [(IsEducationOfficer | IsAdmin)],
+        "my_reports": [(IsTeacher & IsOwner)],
     }
-
-    FILTERSETS_BY_ACTION = {
-        "submitted_reports": SubmittedReportsFilter,
-    }
-
     model = SessionReport
     queryset = SessionReport.objects.all()
     serializer_class = SessionReportSerializer
     deactivate_serializer_class = SessionReportDeactivateSerializer
     set_owner_serializer_class = SetOwnerJustTeacherSerializer
     lookup_url_kwarg = "pk"
+    filterset_class = SubmittedReportsFilter
 
     @audit
     def perform_create(self, serializer):
@@ -84,11 +80,7 @@ class SessionReportAPIModelViewSet(BaseModelViewSet):
                 reference_date_time=datetime.combine(
                     course_session.date, course_session.end_time
                 ),
-                is_delayed=(
-                    timezone.now()
-                    - datetime.combine(course_session.date, course_session.end_time)
-                    > timedelta(hours=48)
-                ),
+                is_delayed=False,
                 last_submit_date_time=None,
                 state=State.ACTIVE,
                 status=ReportStatus.DRAFT,
@@ -98,16 +90,23 @@ class SessionReportAPIModelViewSet(BaseModelViewSet):
     def perform_activate(self, serializer):
         if serializer.validated_data["status"] == ReportStatus.WAITING_FOR_REVIEW:
             obj = serializer.instance
-            obj.last_submit_date_time = timezone.now()
-            obj.is_delayed = timezone.now() - obj.reference_date_time > timedelta(
-                hours=48
-            )
+            now = timezone.now()
+
+            delay = now - (obj.reference_date_time + timedelta(hours=48))
+            is_delayed = delay.total_seconds() > 0
+
+            obj.last_submit_date_time = now
+            obj.is_delayed = is_delayed
+            obj.delay_minutes = int(delay.total_seconds() / 60) if is_delayed else 0
+
             obj.save(
                 update_fields=[
                     "last_submit_date_time",
                     "is_delayed",
+                    "delay_minutes",
                 ]
             )
+
         super().perform_activate(serializer)
 
     @audit
@@ -137,6 +136,19 @@ class SessionReportAPIModelViewSet(BaseModelViewSet):
     def submitted_reports(self, request):
         reports = SessionReport.objects.filter(status=ReportStatus.WAITING_FOR_REVIEW)
         reports = self.filter_queryset(reports)
+        serializer = SessionReportSerializer(reports, many=True)
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK,
+        )
+
+    @action(
+        detail=False,
+        methods=["GET"],
+        url_path="my-reports",
+    )
+    def my_reports(self, request):
+        reports = SessionReport.objects.filter(owner_user=request.user)
         serializer = SessionReportSerializer(reports, many=True)
         return Response(
             serializer.data,
