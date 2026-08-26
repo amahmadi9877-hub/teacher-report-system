@@ -10,6 +10,7 @@ from core.permissions import IsEducationOfficer, IsAdmin, IsTeacher, IsOwner
 from core.views import BaseModelViewSet
 from core.serializers import SetOwnerJustTeacherSerializer
 from courses.enums import CourseSessionStatus
+from courses.filters import CourseSessionFilter
 from courses.models import CourseSession
 from courses.serializers import CourseSessionModelSerializer
 from reports.serializers import SessionReportSerializer
@@ -29,18 +30,27 @@ class CourseSessionAPIModelViewSet(BaseModelViewSet):
     serializer_class = CourseSessionModelSerializer
     lookup_url_kwarg = "pk"
     set_owner_serializer_class = SetOwnerJustTeacherSerializer
+    filterset_class = CourseSessionFilter
+    search_fields = [
+        "course__school__name",
+        "course__name",
+        "course__academic_term__name",
+        "owner_user__first_name",
+        "owner_user__last_name",
+    ]
 
     def perform_deactivate(self, serializer):
         obj = serializer.instance
+        end_datetime = timezone.make_aware(datetime.combine(obj.date, obj.end_time))
         if (
-            obj.status == CourseSessionStatus.COMPLETED
-            and timezone.now() < datetime.combine(obj.date, obj.end_time)
+            serializer.validated_data["status"] == CourseSessionStatus.COMPLETED
+            and timezone.now() < end_datetime
         ):
             raise exceptions.PermissionDenied(
                 detail="Completing the session before end_time is forbidden!"
             )
         if (
-            obj.status == CourseSessionStatus.CANCELED
+            serializer.validated_data["status"] == CourseSessionStatus.CANCELED
             and obj.sessionreport_set.exists()
         ):
             raise exceptions.PermissionDenied(

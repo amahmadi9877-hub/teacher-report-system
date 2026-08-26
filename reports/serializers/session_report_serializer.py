@@ -1,13 +1,14 @@
 from rest_framework import serializers
 from core.enums import State
 from core.serializers import BaseModelSerializer
-from core.validators import PosetiveIntValidator
+from core.validators import posetive_int_validator
 from courses.enums import CourseSessionStatus
 from reports.models import SessionReport
 
 
 class SessionReportSerializer(BaseModelSerializer):
     is_delayed = serializers.BooleanField(read_only=True)
+    delay_minutes = serializers.IntegerField(read_only=True)
     reviewer_description = serializers.CharField(read_only=True)
     last_submit_date_time = serializers.DateTimeField(read_only=True)
     reference_date_time = serializers.DateTimeField(read_only=True)
@@ -73,10 +74,10 @@ class SessionReportSerializer(BaseModelSerializer):
                 }
             )
 
-        PosetiveIntValidator(
+        posetive_int_validator(
             attrs.get("attendees", getattr(self.instance, "attendees", 0)), "attendees"
         )
-        PosetiveIntValidator(
+        posetive_int_validator(
             attrs.get("absentees", getattr(self.instance, "absentees", 0)), "absentees"
         )
 

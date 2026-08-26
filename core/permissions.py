@@ -15,7 +15,7 @@ class IsEducationOfficer(permissions.BasePermission):
         )
 
 
-class IsFinanceOfficerOrAdmin(permissions.BasePermission):
+class IsFinanceOfficer(permissions.BasePermission):
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated

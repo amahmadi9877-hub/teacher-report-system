@@ -43,6 +43,6 @@ class CreateUserCommandTest(TestCase):
             )
         self.assertEqual(
             str(cm.exception),
-            "backup-phone-number is required for teachers!(--backup-phone-number)",
+            "backup-phone-number is required for teachers!(--bpn)",
         )
         self.assertFalse(AUTH_USER.objects.filter(username="teachertest1").exists())

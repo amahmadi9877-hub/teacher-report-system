@@ -14,25 +14,24 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--role",
+            "--r",
             choices=[value for value in UserRole.selectable_choices()],
             required=True,
+            dest="role",
         )
-        parser.add_argument("--username", required=True)
-        parser.add_argument("--first-name", required=True)
-        parser.add_argument("--last-name", required=True)
-        parser.add_argument("--phone-number", required=True)
-        parser.add_argument("--backup-phone-number", required=False)
-        parser.add_argument("--password", required=True)
+        parser.add_argument("--usern", required=True, dest="username")
+        parser.add_argument("--fn", required=True, dest="first_name")
+        parser.add_argument("--ln", required=True, dest="last_name")
+        parser.add_argument("--pn", required=True, dest="phone_number")
+        parser.add_argument("--bpn", required=False, dest="backup_phone_number")
+        parser.add_argument("--passw", required=True, dest="password")
 
     def handle(self, *args, **options):
         if (
             not options.get("backup_phone_number")
             and options.get("role") == UserRole.TEACHER
         ):
-            raise CommandError(
-                "backup-phone-number is required for teachers!(--backup-phone-number)"
-            )
+            raise CommandError("backup-phone-number is required for teachers!(--bpn)")
 
         user = AUTH_USER(
             username=options.get("username"),
