@@ -63,8 +63,6 @@ class PayrollAPIModelViewSet(BaseModelViewSet):
         url_path="per-month",
     )
     def payrolls_per_month(self, request):
-        print("QUERY PARAMS:", request.query_params)
-        print("DICT:", request.query_params.dict())
         serializer = YearAndMonthSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
 
